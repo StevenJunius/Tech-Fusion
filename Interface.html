@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <!-- Styling the UI -->
+    <style>
+      body {
+        background-color: #DAF0F2;
+        margin: 0 50px;
+      }
+
+      h1 {
+        text-align: center;
+        margin-top: 0px;
+        margin-bottom: 0px;
+      }
+
+      p {
+        color: gray;
+        text-align: center;
+      }
+
+      input[type="button"] {
+        padding: 10px 15px;
+        background-color: #62cff4;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+      }
+      input[type="button"]:hover {
+        background-color: #2c67f2;
+        transform: scale(1.05);
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      label, input[type="email"], input[type="text"] {
+        width: 100%;
+        max-width: 300px;
+      }
+
+      input[type="email"], input[type="text"] {
+        padding: 10px;
+        margin: 5px 0 15px 0;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+      }
+
+      footer {
+        text-align: center;
+        margin-top: 20px;
+      }
+    </style>
+    <!-- Generating a button -->
+    <script>
+      function submitForm() {
+        var email = document.getElementById('email').value;
+        var startDate = document.getElementById('startDate').value;
+        var endDate = document.getElementById('endDate').value;
+        
+        google.script.run
+          .withSuccessHandler(() => {
+            alert('Report generation initiated.');
+          })
+          .withFailureHandler((error) => {
+            alert('Error: ' + error.message);
+          })
+          .sendReportEmail(startDate, endDate, email);
+      }
+    </script>
+  </head>
+  <body>
+    <h1>Generate Sales Report</h1>
+    <hr/>
+    <p>Welcome to the Sales Report Generator</p>
+    <form id="salesReportForm">
+      <label for="email">Email Address:</label>
+      <input type="email" id="email" name="email" placeholder="example@gmail.com" required>
+      <br>
+      <label for="startDate">Start Date:</label>
+      <input type="date" id="startDate" name="startDate" required>
+      <br>
+      <label for="endDate">End Date:</label>
+      <input type="date" id="endDate" name="endDate" required>
+      <br>
+      <input type="button" value="Generate Report" onclick="submitForm()">
+    </form>
+    <footer>
+      <p>Powered by Tech Fusion</p>
+    </footer>
+  </body>
+</html>
