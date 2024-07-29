@@ -1,0 +1,92 @@
+function onOpen() {
+  var ui = SpreadsheetApp.getUi();
+  ui.createMenu('Sales Report')
+    .addItem('Generate Report', 'openSalesReportUI')
+    .addToUi();
+}
+
+// UI Function
+function openSalesReportUI() {
+  var htmlOutput = HtmlService.createHtmlOutputFromFile('Interface')
+      .setTitle('Sales Report Generator')
+      .setWidth(500)
+      .setHeight(500);
+  SpreadsheetApp.getUi().showModalDialog(htmlOutput, 'Sales Report Generator');
+}
+
+// Generating Sales Report
+function generateSalesReport(startDate, endDate, email) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Sales Report");
+  var data = sheet.getDataRange().getValues();
+
+  var totalSales = 0;
+  var totalRevenue = 0;
+  var productSales = {};
+
+  for (var i = 1; i < data.length; i++) {
+    var date = new Date(data[i][0]);
+    if (date >= new Date(startDate) && date <= new Date(endDate)) {
+      var product = data[i][1];
+      var quantity = data[i][2];
+      var revenue = data[i][3];
+
+      totalSales += quantity;
+      totalRevenue += revenue;
+
+      if (productSales[product]) {
+        productSales[product] += quantity;
+      } else {
+        productSales[product] = quantity;
+      }
+    }
+  }
+
+  var report = "Sales Report\n\n";
+  report += "Total Sales: " + totalSales + "\n";
+  report += "Total Revenue: " + totalRevenue + "\n\n";
+  report += "Sales by Product:\n";
+
+  for (var product in productSales) {
+    report += product + ": " + productSales[product] + "\n";
+  }
+
+  MailApp.sendEmail(email, "Automated Sales Report", report);
+}
+
+// Send Report through Email
+function sendReportEmail(startDate, endDate, email) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Sales Report");
+  var data = sheet.getDataRange().getValues();
+  var report = [];
+
+  for (var i = 1; i < data.length; i++) {
+    var date = new Date(data[i][0]);
+    if (date >= new Date(startDate) && date <= new Date(endDate)) {
+      report.push(data[i]);
+    }
+  }
+
+  if (report.length === 0) {
+    MailApp.sendEmail(email, "Sales Report", "No data found for the selected date range.");
+    return;
+  }
+
+  let htmlBody = "<h2>Sales Report</h2>";
+  htmlBody += "<table border='1'><tr><th>Date</th><th>Product Name</th><th>Quantity</th><th>Revenue</th></tr>";
+
+  report.forEach(row => {
+    htmlBody += "<tr>";
+    row.forEach(cell => {
+      htmlBody += `<td>${cell}</td>`;
+    });
+    htmlBody += "</tr>";
+  });
+
+  htmlBody += "</table>";
+
+  MailApp.sendEmail({
+    to: email,
+    subject: "Sales Report",
+    htmlBody: htmlBody
+  });
+}
